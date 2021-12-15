@@ -6,6 +6,7 @@ contract WavePortal {
 
 	// State vars =========================================================
 
+	uint256 private seed;
 	uint256 totalWaves;
 	address[] waveAddresses;
 	Wave[] waves;
@@ -26,6 +27,8 @@ contract WavePortal {
 
   constructor() payable {
   	console.log("whaddup tho");
+  	// Set the initial pseudo-random seed
+  	seed = (block.timestamp + block.difficulty) % 100;
   }
 
   function wave(string memory _message) public {
@@ -42,15 +45,22 @@ contract WavePortal {
   	waveCounts[msg.sender]++;
 
   	console.log("%s has waved saying %s, bruh!", msg.sender, _message);
+	
+	  // Create random seed to award prize
+	  seed = (block.timestamp + block.difficulty + seed) % 100;
+	  console.log("Random number generated: %d", seed);
 
-  	// Award the prize
-  	uint256 prizeAmount = 0.0001 ether;
-    require(prizeAmount <= address(this).balance, "Insufficient balance for prize");
+	  if (seed <= 50) {
+	  	// Award the prize
+	  	uint256 prizeAmount = 0.0001 ether;
+	    require(prizeAmount <= address(this).balance, "Insufficient balance for prize");
 
-    (bool success, ) = (msg.sender).call{value: prizeAmount}("");
-    require(success, "Failed to withdraw money from contract.");
-    console.log("Prize awarded: new balance:");
-    console.log(address(this).balance);
+	    (bool success, ) = (msg.sender).call{value: prizeAmount}("");
+	    require(success, "Failed to withdraw money from contract.");
+	    console.log("Prize awarded: new balance: %d", address(this).balance);
+	  } else {
+	  	console.log("No prize awarded");
+	  }
   }
 
   function getTotalWaves() public view returns (uint256) {

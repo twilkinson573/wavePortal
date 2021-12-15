@@ -19,6 +19,10 @@ const main = async () => {
   let waveTxn;
   waveTxn = await waveContract.wave("first the worst");
   await waveTxn.wait();
+
+  contractBalance = await hre.ethers.provider.getBalance(waveContract.address);
+  console.log('Contract balance:', hre.ethers.utils.formatEther(contractBalance));
+  
   waveTxn = await waveContract.wave("second the best tho");
   await waveTxn.wait();
 
