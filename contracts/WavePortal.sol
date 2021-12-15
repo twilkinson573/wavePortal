@@ -6,22 +6,23 @@ contract WavePortal {
 
 	// State vars =========================================================
 
-	uint256 private seed;
-	uint256 totalWaves;
+	uint private seed;
+	uint totalWaves;
 	address[] waveAddresses;
 	Wave[] waves;
 
 	mapping (address => uint) waveCounts;
+	mapping (address => uint) lastWavedAt;
 
   struct Wave {
   	address waver;
   	string message;
-  	uint256 timestamp;
+  	uint timestamp;
   }
 
 	// Events =============================================================
 
-  event NewWave(address indexed waver, string message, uint256 timestamp);
+  event NewWave(address indexed waver, string message, uint timestamp);
 
 	// Functions ==========================================================
 
@@ -32,19 +33,19 @@ contract WavePortal {
   }
 
   function wave(string memory _message) public {
-  	totalWaves += 1;
+  	require(lastWavedAt[msg.sender] + 15 minutes < block.timestamp);
 
   	waves.push(Wave(msg.sender, _message, block.timestamp));
+  	console.log("%s has waved saying %s, bruh!", msg.sender, _message);
 
   	emit NewWave(msg.sender, _message, block.timestamp);
 
-  	// Record wave
-  	if (waveCounts[msg.sender] == 0) {
-  		waveAddresses.push(msg.sender);
-  	}
+  	// Update state records
+  	if (waveCounts[msg.sender] == 0) { waveAddresses.push(msg.sender); }
+  	totalWaves += 1;
   	waveCounts[msg.sender]++;
+  	lastWavedAt[msg.sender] = block.timestamp;
 
-  	console.log("%s has waved saying %s, bruh!", msg.sender, _message);
 	
 	  // Create random seed to award prize
 	  seed = (block.timestamp + block.difficulty + seed) % 100;
@@ -52,7 +53,7 @@ contract WavePortal {
 
 	  if (seed <= 50) {
 	  	// Award the prize
-	  	uint256 prizeAmount = 0.0001 ether;
+	  	uint prizeAmount = 0.0001 ether;
 	    require(prizeAmount <= address(this).balance, "Insufficient balance for prize");
 
 	    (bool success, ) = (msg.sender).call{value: prizeAmount}("");
@@ -63,7 +64,7 @@ contract WavePortal {
 	  }
   }
 
-  function getTotalWaves() public view returns (uint256) {
+  function getTotalWaves() public view returns (uint) {
   	console.log("We have %d total waves", totalWaves);
   	return totalWaves;
   }

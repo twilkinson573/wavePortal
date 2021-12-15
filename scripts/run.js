@@ -16,13 +16,14 @@ const main = async () => {
   let waveCount;
   waveCount = await waveContract.getTotalWaves();
 
-  let waveTxn;
-  waveTxn = await waveContract.wave("first the worst");
-  await waveTxn.wait();
+  // This transaction will now fail due to 15 minute cooldown requirement
+  // let waveTxn;
+  // waveTxn = await waveContract.wave("first the worst");
+  // await waveTxn.wait();
 
   contractBalance = await hre.ethers.provider.getBalance(waveContract.address);
   console.log('Contract balance:', hre.ethers.utils.formatEther(contractBalance));
-  
+
   waveTxn = await waveContract.wave("second the best tho");
   await waveTxn.wait();
 
