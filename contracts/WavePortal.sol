@@ -4,6 +4,8 @@ import "hardhat/console.sol";
 
 contract WavePortal {
 
+	// State vars =========================================================
+
 	uint256 totalWaves;
 	address[] waveAddresses;
 	Wave[] waves;
@@ -16,11 +18,13 @@ contract WavePortal {
   	uint256 timestamp;
   }
 
-  // Event NewWave
+	// Events =============================================================
 
   event NewWave(address indexed waver, string message, uint256 timestamp);
 
-  constructor() {
+	// Functions ==========================================================
+
+  constructor() payable {
   	console.log("whaddup tho");
   }
 
@@ -31,13 +35,22 @@ contract WavePortal {
 
   	emit NewWave(msg.sender, _message, block.timestamp);
 
+  	// Record wave
   	if (waveCounts[msg.sender] == 0) {
   		waveAddresses.push(msg.sender);
   	}
-
   	waveCounts[msg.sender]++;
 
   	console.log("%s has waved saying %s, bruh!", msg.sender, _message);
+
+  	// Award the prize
+  	uint256 prizeAmount = 0.0001 ether;
+    require(prizeAmount <= address(this).balance, "Insufficient balance for prize");
+
+    (bool success, ) = (msg.sender).call{value: prizeAmount}("");
+    require(success, "Failed to withdraw money from contract.");
+    console.log("Prize awarded: new balance:");
+    console.log(address(this).balance);
   }
 
   function getTotalWaves() public view returns (uint256) {
@@ -55,7 +68,6 @@ contract WavePortal {
     for(uint i = 0; i < waveAddresses.length; i++) {
     	console.log("%s: %s", waveAddresses[i], waveCounts[waveAddresses[i]]);
     }
-
   	console.log("--------------------------");
   }
   
