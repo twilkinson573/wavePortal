@@ -33,7 +33,7 @@ contract WavePortal {
   }
 
   function wave(string memory _message) public {
-  	require(lastWavedAt[msg.sender] + 15 minutes < block.timestamp);
+  	require(lastWavedAt[msg.sender] + 15 minutes < block.timestamp, "Must wait 15 minutes between waves");
 
   	waves.push(Wave(msg.sender, _message, block.timestamp));
   	console.log("%s has waved saying %s, bruh!", msg.sender, _message);
